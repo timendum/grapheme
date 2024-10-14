@@ -16,10 +16,10 @@ class GetGroupTest(TestCase):
         self.assertEqual(get_group("\u0605"), GraphemePropertyGroup.PREPEND)
 
     def test_get_group_cr(self):
-        self.assertEqual(get_group("\u000D"), GraphemePropertyGroup.CR)
+        self.assertEqual(get_group("\u000d"), GraphemePropertyGroup.CR)
 
     def test_get_group_lf(self):
-        self.assertEqual(get_group("\u000A"), GraphemePropertyGroup.LF)
+        self.assertEqual(get_group("\u000a"), GraphemePropertyGroup.LF)
 
     def test_get_group(self):
         self.assertEqual(get_group("s"), GraphemePropertyGroup.OTHER)
@@ -33,21 +33,21 @@ class GraphemesTest(TestCase):
         self.assertEqual(list(grapheme.graphemes("alvin")), list("alvin"))
 
     def test_emoji_with_modifier(self):
-        input_str = "\U0001F476\U0001F3FB"
+        input_str = "\U0001f476\U0001f3fb"
         self.assertEqual(list(grapheme.graphemes(input_str)), [input_str])
 
     def test_cr_lf(self):
-        self.assertEqual(list(grapheme.graphemes("\u000D\u000A")), ["\u000D\u000A"])
+        self.assertEqual(list(grapheme.graphemes("\u000d\u000a")), ["\u000d\u000a"])
 
     def test_mixed_text(self):
-        input_str = " \U0001F476\U0001F3FB ascii \u000D\u000A"
-        graphemes = [" ", "\U0001F476\U0001F3FB", " ",  "a", "s", "c", "i", "i", " ", input_str[-2:]]
+        input_str = " \U0001f476\U0001f3fb ascii \u000d\u000a"
+        graphemes = [" ", "\U0001f476\U0001f3fb", " ", "a", "s", "c", "i", "i", " ", input_str[-2:]]
         self.assertEqual(list(grapheme.graphemes(input_str)), graphemes)
         self.assertEqual(list(grapheme.grapheme_lengths(input_str)), [len(g) for g in graphemes])
-        self.assertEqual(grapheme.slice(input_str, 0, 2), " \U0001F476\U0001F3FB")
-        self.assertEqual(grapheme.slice(input_str, 0, 3), " \U0001F476\U0001F3FB ")
-        self.assertEqual(grapheme.slice(input_str, end=3), " \U0001F476\U0001F3FB ")
-        self.assertEqual(grapheme.slice(input_str, 1, 4), "\U0001F476\U0001F3FB a")
+        self.assertEqual(grapheme.slice(input_str, 0, 2), " \U0001f476\U0001f3fb")
+        self.assertEqual(grapheme.slice(input_str, 0, 3), " \U0001f476\U0001f3fb ")
+        self.assertEqual(grapheme.slice(input_str, end=3), " \U0001f476\U0001f3fb ")
+        self.assertEqual(grapheme.slice(input_str, 1, 4), "\U0001f476\U0001f3fb a")
         self.assertEqual(grapheme.slice(input_str, 2), input_str[3:])
         self.assertEqual(grapheme.slice(input_str, 2, 4), " a")
         self.assertEqual(grapheme.length(input_str), 10)
@@ -58,11 +58,11 @@ class GraphemesTest(TestCase):
         self.assertEqual(grapheme.length(input_str, until=11), 10)
 
     def test_contains(self):
-        input_str = " \U0001F476\U0001F3FB ascii \u000D\u000A"
+        input_str = " \U0001f476\U0001f3fb ascii \u000d\u000a"
 
-        self.assertFalse(grapheme.contains(input_str, " \U0001F476"))
-        self.assertFalse(grapheme.contains(input_str, "\u000D"))
-        self.assertFalse(grapheme.contains(input_str, "\U0001F3FB"))
+        self.assertFalse(grapheme.contains(input_str, " \U0001f476"))
+        self.assertFalse(grapheme.contains(input_str, "\u000d"))
+        self.assertFalse(grapheme.contains(input_str, "\U0001f3fb"))
         self.assertTrue(grapheme.contains(input_str, ""))
 
         graphemes = list(grapheme.graphemes(input_str))
@@ -70,12 +70,14 @@ class GraphemesTest(TestCase):
             self.assertTrue(grapheme.contains(input_str, grapheme_))
 
         for i in range(len(graphemes) - 1):
-            self.assertTrue(grapheme.contains(input_str, "".join(graphemes[i:i+2])))
+            self.assertTrue(grapheme.contains(input_str, "".join(graphemes[i : i + 2])))
 
 
 def read_test_data():
     TEST_CASES = []
-    with open(os.path.join(os.path.dirname(__file__), "../unicode-data/GraphemeBreakTest.txt"), 'r') as f:
+    with open(
+        os.path.join(os.path.dirname(__file__), "../unicode-data/GraphemeBreakTest.txt"), "r"
+    ) as f:
         for line in f.readlines():
             if line.startswith("#"):
                 continue
@@ -83,15 +85,15 @@ def read_test_data():
             test_data, description = line.split("#")
 
             expected_graphemes = [
-                "".join([
-                    chr(int(char, 16)) for char in cluster.split("×") if char.strip()
-                ])
-                for cluster in test_data.split("÷") if cluster.strip()
+                "".join([chr(int(char, 16)) for char in cluster.split("×") if char.strip()])
+                for cluster in test_data.split("÷")
+                if cluster.strip()
             ]
 
             input_string = "".join(expected_graphemes)
             TEST_CASES.append((input_string, expected_graphemes, description))
     return TEST_CASES
+
 
 TEST_CASES = read_test_data()
 

@@ -102,6 +102,7 @@ def slice(string, start=None, end=None):
 
     return ""
 
+
 def contains(string, substring):
     """
     Returns true if the sequence of graphemes in substring is also present in string.

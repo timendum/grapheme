@@ -109,6 +109,7 @@ class FSM:
             return False, cls.default
         return cls.default(n)
 
+
 class BreakPossibility(Enum):
     CERTAIN = "certain"
     POSSIBLE = "possible"

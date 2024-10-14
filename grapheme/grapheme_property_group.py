@@ -22,7 +22,9 @@ class GraphemePropertyGroup(Enum):
 
     OTHER = "Other"
 
+
 COMMON_OTHER_GROUP_CHARS = ""
+
 
 def get_group(char):
     if char in COMMON_OTHER_GROUP_CHARS:
@@ -43,6 +45,7 @@ class ContainerNode:
     """
     Simple implementation of interval based BTree with no support for deletion.
     """
+
     def __init__(self, children):
         self.children = self._sorted(children)
         self._set_min_max()
@@ -94,7 +97,8 @@ class LeafNode:
     def get_value(self, _key):
         return self.group
 
-with open(os.path.join(os.path.dirname(__file__), "data/grapheme_break_property.json"), 'r') as f:
+
+with open(os.path.join(os.path.dirname(__file__), "data/grapheme_break_property.json"), "r") as f:
     data = json.load(f)
 
     assert len(data) == len(GraphemePropertyGroup) - 1
@@ -116,7 +120,7 @@ with open(os.path.join(os.path.dirname(__file__), "data/grapheme_break_property.
                 for i in range(min_, max_ + 1):
                     SINGLE_CHAR_MAPPINGS[i] = group
                 continue
-            new_node = LeafNode( min_, max_, group)
+            new_node = LeafNode(min_, max_, group)
             if RANGE_TREE:
                 new_subtree = RANGE_TREE.add(new_node)
                 if new_subtree:
@@ -125,5 +129,7 @@ with open(os.path.join(os.path.dirname(__file__), "data/grapheme_break_property.
                 RANGE_TREE = ContainerNode([new_node])
 
     common_ascii = string.ascii_letters + string.digits + string.punctuation
-    COMMON_OTHER_GROUP_CHARS = "".join(c for c in common_ascii if get_group(c) == GraphemePropertyGroup.OTHER)
+    COMMON_OTHER_GROUP_CHARS = "".join(
+        c for c in common_ascii if get_group(c) == GraphemePropertyGroup.OTHER
+    )
     del data

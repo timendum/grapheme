@@ -15,11 +15,11 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class Group:
     single_chars = []
     ranges = []
+
+
 def group():
-    return dict(
-        single_chars=[],
-        ranges=[]
-    )
+    return dict(single_chars=[], ranges=[])
+
 
 chardata = defaultdict(group)
 
