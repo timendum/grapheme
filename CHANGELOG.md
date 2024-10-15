@@ -1,3 +1,8 @@
+## 0.7.0
+Added support for Unicode 16.
+Drops support for python 3.6. Now tested on python 3.7 - 3.12.
+No API changes.
+
 ## 0.6.0
 Added support for Unicode 13.
 

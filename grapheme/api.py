@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 from grapheme.finder import GraphemeIterator, get_last_certain_break_index
 
-
-UNICODE_VERSION = "13.0.0"
+UNICODE_VERSION = "16.0.0"
 
 
 def graphemes(string):
@@ -12,8 +10,8 @@ def graphemes(string):
     >>> rainbow_flag = "🏳️‍🌈"
     >>> [codepoint for codepoint in rainbow_flag]
     ['🏳', '️', '\u200d', '🌈']
-    >>> list(grapheme.graphemes("multi codepoint grapheme: " + rainbow_flag))
-    ['m', 'u', 'l', 't', 'i', ' ', 'c', 'o', 'd', 'e', 'p', 'o', 'i', 'n', 't', ' ', 'g', 'r', 'a', 'p', 'h', 'e', 'm', 'e', ':', ' ', '🏳️‍🌈']
+    >>> list(grapheme.graphemes("multi codepoint: " + rainbow_flag))
+    ['m', 'u', 'l', 't', 'i', ' ', 'c', 'o', 'd', 'e', 'p', 'o', 'i', 'n', 't', ':', ' ', '🏳️‍🌈']
     """
     return iter(GraphemeIterator(string))
 
@@ -55,7 +53,7 @@ def length(string, until=None):
     return count
 
 
-# todo: should probably use an optimized iterator that only deals with code point counts (optimization)
+# TODO: should probably use an optimized iterator that only deals with code point counts
 def grapheme_lengths(string):
     """
     Returns an iterator of number of code points in each grapheme of the string.
@@ -150,10 +148,11 @@ def contains(string, substring):
 
 def startswith(string, prefix):
     """
-    Like str.startswith, but also checks that the string starts with the given prefixes sequence of graphemes.
+    Like str.startswith, but also checks that the string starts with the given prefixes sequence of
+    graphemes.
 
-    str.startswith may return true for a prefix that is not visually represented as a prefix if a grapheme cluster
-    is continued after the prefix ends.
+    str.startswith may return true for a prefix that is not visually represented as a prefix if a
+    grapheme cluster is continued after the prefix ends.
 
     >>> grapheme.startswith("✊🏾", "✊")
     False
@@ -165,10 +164,11 @@ def startswith(string, prefix):
 
 def endswith(string, suffix):
     """
-    Like str.endswith, but also checks that the string ends with the given prefixes sequence of graphemes.
+    Like str.endswith, but also checks that the string endswith the given prefixes sequence of
+    graphemes.
 
-    str.endswith may return true for a suffix that is not visually represented as a suffix if a grapheme cluster
-    is initiated before the suffix starts.
+    str.endswith may return true for a suffix that is not visually represented as a suffix if a
+    grapheme cluster is initiated before the suffix starts.
 
     >>> grapheme.endswith("🏳️‍🌈", "🌈")
     False
@@ -181,15 +181,18 @@ def endswith(string, suffix):
 
 def safe_split_index(string, max_len):
     """
-    Returns the highest index up to `max_len` at which the given string can be sliced, without breaking a grapheme.
+    Returns the highest index up to `max_len` at which the given string can be sliced,
+    without breaking a grapheme.
 
-    This is useful for when you want to split or take a substring from a string, and don't really care about
+    This is useful for when you want to split or take a substring from a string,
+    and don't really care about
     the exact grapheme length, but don't want to risk breaking existing graphemes.
 
-    This function does normally not traverse the full grapheme sequence up to the given length, so it can be used
-    for arbitrarily long strings and high `max_len`s. However, some grapheme boundaries depend on the previous state,
-    so the worst case performance is O(n). In practice, it's only very long non-broken sequences of country flags
-    (represented as Regional Indicators) that will perform badly.
+    This function does normally not traverse the full grapheme sequence up to the given length,
+    so it can be used for arbitrarily long strings and high `max_len`s.
+    However, some grapheme boundaries depend on the previous state,
+    so the worst case performance is O(n). In practice, it's only very long non-broken sequences
+    of country flags (represented as Regional Indicators) that will perform badly.
 
     The return value will always be between `0` and `len(string)`.
 
@@ -203,8 +206,8 @@ def safe_split_index(string, max_len):
     'நி (ni)'
     """
     last_index = get_last_certain_break_index(string, max_len)
-    for l in grapheme_lengths(string[last_index:]):
-        if last_index + l > max_len:
+    for i in grapheme_lengths(string[last_index:]):
+        if last_index + i > max_len:
             break
-        last_index += l
+        last_index += i
     return last_index

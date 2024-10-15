@@ -1,113 +1,9 @@
 from enum import Enum
 
-from grapheme.grapheme_property_group import GraphemePropertyGroup as G
+from grapheme.grapheme_property_group import GraphemePropertyGroup as GraphGroup
 from grapheme.grapheme_property_group import get_group
-
-
-class FSM:
-    @classmethod
-    def default(cls, n):
-        if n is G.OTHER:
-            return True, cls.default
-
-        if n is G.CR:
-            return True, cls.cr
-
-        if n in [G.LF, G.CONTROL]:
-            return True, cls.lf_or_control
-
-        if n in [G.EXTEND, G.SPACING_MARK, G.ZWJ]:
-            return False, cls.default
-
-        if n is G.EXTENDED_PICTOGRAPHIC:
-            return True, cls.emoji
-
-        if n is G.REGIONAL_INDICATOR:
-            return True, cls.ri
-
-        if n is G.L:
-            return True, cls.hangul_l
-
-        if n in [G.LV, G.V]:
-            return True, cls.hangul_lv_or_v
-
-        if n in [G.LVT, G.T]:
-            return True, cls.hangul_lvt_or_t
-
-        if n is G.PREPEND:
-            return True, cls.prepend
-
-        return True, cls.default
-
-    @classmethod
-    def default_next_state(cls, n, should_break):
-        _, next_state = cls.default(n)
-        return should_break, next_state
-
-    @classmethod
-    def cr(cls, n):
-        if n is G.LF:
-            return False, cls.lf_or_control
-        return cls.default_next_state(n, should_break=True)
-
-    @classmethod
-    def lf_or_control(cls, n):
-        return cls.default_next_state(n, should_break=True)
-
-    @classmethod
-    def prepend(cls, n):
-        if n in [G.CONTROL, G.LF]:
-            return True, cls.default
-        if n is G.CR:
-            return True, cls.cr
-        return cls.default_next_state(n, should_break=False)
-
-    # Hanguls
-    @classmethod
-    def hangul_l(cls, n):
-        if n in [G.V, G.LV]:
-            return False, cls.hangul_lv_or_v
-        if n is G.LVT:
-            return False, cls.hangul_lvt_or_t
-        if n is G.L:
-            return False, cls.hangul_l
-        return cls.default(n)
-
-    @classmethod
-    def hangul_lv_or_v(cls, n):
-        if n is G.V:
-            return False, cls.hangul_lv_or_v
-        if n is G.T:
-            return False, cls.hangul_lvt_or_t
-        return cls.default(n)
-
-    @classmethod
-    def hangul_lvt_or_t(cls, n):
-        if n is G.T:
-            return False, cls.hangul_lvt_or_t
-        return cls.default(n)
-
-    # Emojis
-    @classmethod
-    def emoji(cls, n):
-        if n is G.EXTEND:
-            return False, cls.emoji
-        if n is G.ZWJ:
-            return False, cls.emoji_zjw
-        return cls.default(n)
-
-    @classmethod
-    def emoji_zjw(cls, n):
-        if n is G.EXTENDED_PICTOGRAPHIC:
-            return False, cls.emoji
-        return cls.default(n)
-
-    # Regional indication (flag)
-    @classmethod
-    def ri(cls, n):
-        if n is G.REGIONAL_INDICATOR:
-            return False, cls.default
-        return cls.default(n)
+from grapheme.incb_property_group import InCBPropertyGroup as InCBGroup
+from grapheme.incb_property_group import get_group as get_group_incb
 
 
 class BreakPossibility(Enum):
@@ -118,51 +14,73 @@ class BreakPossibility(Enum):
 
 def get_break_possibility(a, b):
     # Probably most common, included as short circuit before checking all else
-    if a is G.OTHER and b is G.OTHER:
+    if a is GraphGroup.OTHER and b is GraphGroup.OTHER:
         return BreakPossibility.CERTAIN
 
-    assert isinstance(a, G)
-    assert isinstance(b, G)
+    assert isinstance(a, GraphGroup)
+    assert isinstance(b, GraphGroup)
 
     # Only break if preceeded by an uneven number of REGIONAL_INDICATORS
     # sot (RI RI)* RI × RI
-    # [ ^ RI] (RI RI) * RI    ×    RI
-    if a is G.REGIONAL_INDICATOR and b is G.REGIONAL_INDICATOR:
+    # [^RI] (RI RI) * RI × RI
+    if a is GraphGroup.REGIONAL_INDICATOR and b is GraphGroup.REGIONAL_INDICATOR:
         return BreakPossibility.POSSIBLE
 
     # (Control | CR | LF) ÷
     #  ÷ (Control | CR | LF)
-    if a in [G.CONTROL, G.CR, G.LF] or b in [G.CONTROL, G.CR, G.LF]:
+    if a in [GraphGroup.CONTROL, GraphGroup.CR, GraphGroup.LF] or b in [
+        GraphGroup.CONTROL,
+        GraphGroup.CR,
+        GraphGroup.LF,
+    ]:
         # CR × LF
-        if a is G.CR and b is G.LF:
+        if a is GraphGroup.CR and b is GraphGroup.LF:
             return BreakPossibility.NO_BREAK
         else:
             return BreakPossibility.CERTAIN
 
     # L × (L | V | LV | LVT)
-    if a is G.L and b in [G.L, G.V, G.LV, G.LVT]:
+    if a is GraphGroup.L and b in [GraphGroup.L, GraphGroup.V, GraphGroup.LV, GraphGroup.LVT]:
         return BreakPossibility.NO_BREAK
 
     # (LV | V) × (V | T)
-    if a in [G.LV, G.V] and b in [G.V, G.T]:
+    if a in [GraphGroup.LV, GraphGroup.V] and b in [GraphGroup.V, GraphGroup.T]:
         return BreakPossibility.NO_BREAK
 
     # (LVT | T)    ×    T
-    if a in [G.LVT, G.T] and b is G.T:
+    if a in [GraphGroup.LVT, GraphGroup.T] and b is GraphGroup.T:
         return BreakPossibility.NO_BREAK
 
     # × (Extend | ZWJ)
     # × SpacingMark
     # Prepend ×
-    if b in [G.EXTEND, G.ZWJ, G.SPACING_MARK] or a is G.PREPEND:
+    if b in [GraphGroup.EXTEND, GraphGroup.ZWJ, GraphGroup.SPACING_MARK] or a is GraphGroup.PREPEND:
         return BreakPossibility.NO_BREAK
 
     # \p{Extended_Pictographic} Extend* ZWJ × \p{Extended_Pictographic}
-    if a is G.ZWJ and b is G.EXTENDED_PICTOGRAPHIC:
+    if a is GraphGroup.ZWJ and b is GraphGroup.EXTENDED_PICTOGRAPHIC:
         return BreakPossibility.POSSIBLE
 
     # everything else, assumes all other rules are included above
     return BreakPossibility.CERTAIN
+
+
+def get_break_possibility_incb(a, b):
+    # Probably most common, included as short circuit before checking all else
+    if a is InCBGroup.OTHER and b is InCBGroup.OTHER:
+        return BreakPossibility.CERTAIN
+
+    if a in [InCBGroup.LINKER, InCBGroup.EXTEND] and b is InCBGroup.CONSONANT:
+        return BreakPossibility.NO_BREAK
+
+    if a in [InCBGroup.LINKER, InCBGroup.EXTEND, InCBGroup.CONSONANT] and b is InCBGroup.LINKER:
+        return BreakPossibility.NO_BREAK
+
+    assert isinstance(a, InCBGroup)
+    assert isinstance(b, InCBGroup)
+
+    # everything else, assumes all other rules are included above
+    return BreakPossibility.POSSIBLE
 
 
 def get_last_certain_break_index(string, index):
@@ -170,45 +88,183 @@ def get_last_certain_break_index(string, index):
         return len(string)
 
     prev = get_group(string[index])
+    prev_incb = get_group_incb(string[index])
     while True:
         if index <= 0:
             return 0
         index -= 1
         cur = get_group(string[index])
-        if get_break_possibility(cur, prev) == BreakPossibility.CERTAIN:
+        cur_incb = get_group_incb(string[index])
+        if (
+            get_break_possibility(cur, prev) == BreakPossibility.CERTAIN
+            and get_break_possibility_incb(cur_incb, prev_incb) != BreakPossibility.NO_BREAK
+        ):
             return index + 1
         prev = cur
+        prev_incb = cur_incb
+
+
+class UState(Enum):
+    DEFAULT = 0  # No special case
+    GB9c_Consonant = 10
+    GB9c_Extend = 11
+    GB9c_Linker = 12
+    GB11_Picto = 20
+    GB11_ZWJ = 21
+    GB12_First = 30
+    GB12_Second = 31
 
 
 class GraphemeIterator:
-    def __init__(self, string):
+    def __init__(self, string: str):
         self.str_iter = iter(string)
+        self.buffer = ""
+        self.lastg = None
+        self.state = UState.DEFAULT
         try:
             self.buffer = next(self.str_iter)
         except StopIteration:
             self.buffer = None
         else:
-            _, state = FSM.default(get_group(self.buffer))
-            self.state = state
+            lastg = get_group(self.buffer)
+            self.lastg = lastg
+            if lastg is GraphGroup.EXTENDED_PICTOGRAPHIC:
+                self.state = UState.GB11_Picto
+            elif lastg is GraphGroup.REGIONAL_INDICATOR:
+                self.state = UState.GB12_First
+            else:
+                lastincb = get_group_incb(self.buffer)
+                if lastincb is InCBGroup.CONSONANT:
+                    self.state = UState.GB9c_Consonant
 
     def __iter__(self):
         return self
 
+    def default_should_break(self, nextg, nextincb):
+        should_break = None
+        next_state = UState.DEFAULT
+        # First the most common
+        if (
+            self.lastg is GraphGroup.OTHER
+            and nextg is GraphGroup.OTHER
+            and nextincb is InCBGroup.OTHER
+        ):
+            # GB999     Any ÷ Any
+            # Otherwise, break everywhere
+            should_break = True
+        elif self.lastg is GraphGroup.CR and nextg is GraphGroup.LF:
+            # GB3       CR × LF
+            # Do not break between a CR and LF
+            should_break = False
+        elif self.lastg in (GraphGroup.CONTROL, GraphGroup.CR, GraphGroup.LF):
+            # GB4       (Control | CR | LF) ÷
+            # break before and after controls
+            should_break = True
+        elif nextg in (GraphGroup.CONTROL, GraphGroup.CR, GraphGroup.LF):
+            # GB5        ÷ (Control | CR | LF)
+            # break before and after controls.
+            should_break = True
+        elif self.lastg is GraphGroup.L and nextg in (
+            GraphGroup.L,
+            GraphGroup.V,
+            GraphGroup.LV,
+            GraphGroup.LVT,
+        ):
+            # GB6       L × (L | V | LV | LVT)
+            # Do not break Hangul syllable or other conjoining sequences.
+            should_break = False
+        elif self.lastg in (GraphGroup.LV, GraphGroup.V) and nextg in (GraphGroup.V, GraphGroup.T):
+            # GB7       (LV | V) × (V | T)
+            # Do not break Hangul syllable or other conjoining sequences.
+            should_break = False
+        elif self.lastg in (GraphGroup.LVT, GraphGroup.T) and nextg is GraphGroup.T:
+            # GB8       (LVT | T) × T
+            # Do not break Hangul syllable or other conjoining sequences.
+            should_break = False
+        elif nextg in (GraphGroup.EXTEND, GraphGroup.ZWJ, GraphGroup.SPACING_MARK):
+            # GB9        × (Extend | ZWJ)
+            # Do not break before extending characters or ZWJ.
+            # GB9a       × SpacingMark
+            # Do not break before SpacingMarks
+            should_break = False
+        elif self.lastg is GraphGroup.PREPEND:
+            # GB9b      Prepend ×
+            # Do not break after Prepend characters
+            should_break = False
+        # Next State
+        elif nextg is GraphGroup.EXTENDED_PICTOGRAPHIC:
+            next_state = UState.GB11_Picto
+        elif nextg is GraphGroup.REGIONAL_INDICATOR:
+            next_state = UState.GB12_First
+        elif nextg is InCBGroup.CONSONANT:
+            next_state = UState.GB9c_Consonant
+        return should_break, next_state
+
     def __next__(self):
         for codepoint in self.str_iter:
-            should_break, state = self.state(get_group(codepoint))
-            self.state = state
-
-            if should_break:
+            nextg = get_group(codepoint)
+            next_inbc = get_group_incb(codepoint)
+            sb, next_state = self.default_should_break(nextg, next_inbc)
+            if self.state is UState.DEFAULT:
+                pass
+            # GB11
+            elif self.state is UState.GB11_Picto:
+                if nextg is GraphGroup.EXTEND:
+                    next_state = UState.GB11_Picto
+                    sb = False
+                elif nextg is GraphGroup.ZWJ:
+                    next_state = UState.GB11_ZWJ
+                    sb = False
+            elif self.state is UState.GB11_ZWJ and nextg is GraphGroup.EXTENDED_PICTOGRAPHIC:
+                next_state = UState.DEFAULT
+                sb = False
+            # GB12  sot   (RI RI)* RI × RI
+            # GB13  [^RI] (RI RI)* RI × RI
+            # Do not break within emoji flag sequences.
+            # That is, do not break between regional indicator (RI) symbols
+            # if there is an odd number of RI characters before the break point.
+            elif (
+                self.state in (UState.GB12_First, UState.GB12_Second)
+                and nextg is GraphGroup.REGIONAL_INDICATOR
+            ):
+                sb = self.state is not UState.GB12_First
+                next_state = (
+                    UState.GB12_First if self.state is UState.GB12_Second else UState.GB12_Second
+                )
+            # GB9c  Consonant [ Extend Linker ]* Linker [ Extend Linker ]* × Consonant
+            elif self.state is UState.GB9c_Consonant:
+                if next_inbc is InCBGroup.EXTEND:
+                    sb = False
+                    next_state = UState.GB9c_Consonant
+                elif next_inbc is InCBGroup.LINKER:
+                    sb = False
+                    next_state = UState.GB9c_Linker
+            elif self.state is UState.GB9c_Linker:
+                if next_inbc is InCBGroup.LINKER:
+                    sb = False
+                    next_state = UState.GB9c_Linker
+                elif next_inbc is InCBGroup.CONSONANT:
+                    sb = False
+                    next_state = UState.GB9c_Consonant
+                elif next_inbc is InCBGroup.EXTEND:
+                    sb = False
+                    next_state = UState.GB9c_Linker
+            # Handle results
+            self.state = next_state
+            self.lastg = nextg
+            if sb is True or sb is None:
                 return self._break(codepoint)
-            self.buffer += codepoint
+            self.buffer += codepoint  # type: ignore
 
         if self.buffer:
+            # GB2  Any ÷ eot
+            # Break at the end of text, unless the text is empty.
             return self._break(None)
 
         raise StopIteration()
 
     def _break(self, new):
+        """Return the current buffer, start with a new one"""
         old_buffer = self.buffer
         self.buffer = new
         return old_buffer

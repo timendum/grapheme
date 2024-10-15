@@ -26,27 +26,12 @@ class GraphemePropertyGroup(Enum):
 COMMON_OTHER_GROUP_CHARS = ""
 
 
-def get_group(char):
-    if char in COMMON_OTHER_GROUP_CHARS:
-        return GraphemePropertyGroup.OTHER
-    else:
-        return get_group_ord(ord(char))
-
-
-def get_group_ord(char):
-    group = SINGLE_CHAR_MAPPINGS.get(char, None)
-    if group:
-        return group
-
-    return RANGE_TREE.get_value(char) or GraphemePropertyGroup.OTHER
-
-
 class ContainerNode:
     """
     Simple implementation of interval based BTree with no support for deletion.
     """
 
-    def __init__(self, children):
+    def __init__(self, children) -> None:
         self.children = self._sorted(children)
         self._set_min_max()
 
@@ -94,42 +79,70 @@ class LeafNode:
         self.group = group
 
     # Assumes range check has already been done
-    def get_value(self, _key):
+    def get_value(self, _):
         return self.group
 
 
-with open(os.path.join(os.path.dirname(__file__), "data/grapheme_break_property.json"), "r") as f:
-    data = json.load(f)
+SINGLE_CHAR_MAPPINGS = {}
 
-    assert len(data) == len(GraphemePropertyGroup) - 1
+RANGE_TREE = ContainerNode([LeafNode(0, 0, None)])
 
-    SINGLE_CHAR_MAPPINGS = {}
 
-    for key, value in data.items():
-        group = GraphemePropertyGroup(key)
-        for char in value["single_chars"]:
-            SINGLE_CHAR_MAPPINGS[char] = group
+def get_group(char: str):
+    if char in COMMON_OTHER_GROUP_CHARS:
+        return GraphemePropertyGroup.OTHER
+    else:
+        return get_group_ord(ord(char))
 
-    RANGE_TREE = None
-    for key, value in data.items():
-        for range_ in value["ranges"]:
-            min_ = range_[0]
-            max_ = range_[1]
-            group = GraphemePropertyGroup(key)
-            if max_ - min_ < 20:
-                for i in range(min_, max_ + 1):
-                    SINGLE_CHAR_MAPPINGS[i] = group
-                continue
-            new_node = LeafNode(min_, max_, group)
-            if RANGE_TREE:
-                new_subtree = RANGE_TREE.add(new_node)
-                if new_subtree:
-                    RANGE_TREE = ContainerNode([RANGE_TREE, new_subtree])
-            else:
-                RANGE_TREE = ContainerNode([new_node])
 
-    common_ascii = string.ascii_letters + string.digits + string.punctuation
-    COMMON_OTHER_GROUP_CHARS = "".join(
-        c for c in common_ascii if get_group(c) == GraphemePropertyGroup.OTHER
-    )
-    del data
+def get_group_ord(char: int):
+    group = SINGLE_CHAR_MAPPINGS.get(char, None)
+    if group:
+        return group
+
+    return RANGE_TREE.get_value(char) or GraphemePropertyGroup.OTHER
+
+
+def load_file(filename, enumgroup):
+    with open(os.path.join(os.path.dirname(__file__), filename)) as f:
+        data = json.load(f)
+
+        assert len(data) == len(enumgroup) - 1
+
+        single_char_mappings = {}
+
+        for key, value in data.items():
+            group = enumgroup(key)
+            for char in value["single_chars"]:
+                single_char_mappings[char] = group
+
+        range_tree = None
+        for key, value in data.items():
+            for range_ in value["ranges"]:
+                min_ = range_[0]
+                max_ = range_[1]
+                group = enumgroup(key)
+                if max_ - min_ < 20:
+                    for i in range(min_, max_ + 1):
+                        single_char_mappings[i] = group
+                    continue
+                new_node = LeafNode(min_, max_, group)
+                if range_tree:
+                    new_subtree = range_tree.add(new_node)
+                    if new_subtree:
+                        range_tree = ContainerNode([range_tree, new_subtree])
+                else:
+                    range_tree = ContainerNode([new_node])
+
+        del data
+        common_ascii = string.ascii_letters + string.digits + string.punctuation
+        common_other_group_chars = "".join(
+            c for c in common_ascii if get_group_ord(ord(c)) == GraphemePropertyGroup.OTHER
+        )
+
+        return single_char_mappings, range_tree, common_other_group_chars
+
+
+SINGLE_CHAR_MAPPINGS, RANGE_TREE, COMMON_OTHER_GROUP_CHARS = load_file(
+    "data/grapheme_break_property.json", GraphemePropertyGroup
+)

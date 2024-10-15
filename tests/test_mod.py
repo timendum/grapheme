@@ -5,10 +5,10 @@ import os
 from unittest import TestCase
 
 import pytest
-from grapheme.api import safe_split_index
 
-from grapheme.grapheme_property_group import GraphemePropertyGroup, get_group
 import grapheme
+from grapheme.api import safe_split_index
+from grapheme.grapheme_property_group import GraphemePropertyGroup, get_group
 
 
 class GetGroupTest(TestCase):
@@ -41,7 +41,18 @@ class GraphemesTest(TestCase):
 
     def test_mixed_text(self):
         input_str = " \U0001f476\U0001f3fb ascii \u000d\u000a"
-        graphemes = [" ", "\U0001f476\U0001f3fb", " ", "a", "s", "c", "i", "i", " ", input_str[-2:]]
+        graphemes = [
+            " ",
+            "\U0001f476\U0001f3fb",
+            " ",
+            "a",
+            "s",
+            "c",
+            "i",
+            "i",
+            " ",
+            input_str[-2:],
+        ]
         self.assertEqual(list(grapheme.graphemes(input_str)), graphemes)
         self.assertEqual(list(grapheme.grapheme_lengths(input_str)), [len(g) for g in graphemes])
         self.assertEqual(grapheme.slice(input_str, 0, 2), " \U0001f476\U0001f3fb")
@@ -74,9 +85,9 @@ class GraphemesTest(TestCase):
 
 
 def read_test_data():
-    TEST_CASES = []
+    test_cases = []
     with open(
-        os.path.join(os.path.dirname(__file__), "../unicode-data/GraphemeBreakTest.txt"), "r"
+        os.path.join(os.path.dirname(__file__), "../unicode-data/GraphemeBreakTest.txt"),
     ) as f:
         for line in f.readlines():
             if line.startswith("#"):
@@ -91,8 +102,8 @@ def read_test_data():
             ]
 
             input_string = "".join(expected_graphemes)
-            TEST_CASES.append((input_string, expected_graphemes, description))
-    return TEST_CASES
+            test_cases.append((input_string, expected_graphemes, description))
+    return test_cases
 
 
 TEST_CASES = read_test_data()
@@ -142,3 +153,7 @@ def test_suffixes(input_string, expected_graphemes, description):
     for i in range(len(input_string)):
         suffix = input_string[i:]
         assert grapheme.endswith(input_string, suffix) == (suffix in allowed_suffixes)
+
+
+if __name__ == "__main__":
+    pytest.main()

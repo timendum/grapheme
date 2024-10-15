@@ -5,13 +5,15 @@ A Python package for working with user perceived characters. More specifically,
 string manipulation and calculation functions for working with grapheme cluster
 groups (graphemes) as defined by the `Unicode Standard Annex #29 <http://unicode.org/reports/tr29/>`_.
 
-`documentation <https://grapheme.readthedocs.io/>`_
+`documentation <https://graphemeu.readthedocs.io/>`_
 
 .. code-block:: console
 
-    pip install grapheme
+    pip install graphemeu
 
-The currently supported version of Unicode: 13.0.0.
+Or similar.
+
+The currently supported version of Unicode: 16.0.0.
 
 What? Why?
 ==========
@@ -32,7 +34,7 @@ without considering their connection to each other.
     10
     >>> string[:3]
     'u̲n'
-    >>> grapheme.substr(string, 0, 3)
+    >>> grapheme.slice(string, 0, 3)
     'u̲n̲d̲'
 
 This library implements the unicode default rules for extended grapheme clusters, and provides
@@ -41,7 +43,7 @@ a set of functions for string manipulation based on graphemes.
 Documentation
 =============
 
-See `<https://grapheme.readthedocs.io/en/latest/>`_.
+See `<https://graphemeu.readthedocs.io/en/latest/>`_.
 
 When should I consider graphemes instead of unicode characters?
 ===============================================================
@@ -115,12 +117,11 @@ Development quick start
 
 If you wish to contribute or edit this package, create a fork and clone it.
 
-Then install in locally editable (``-e``) mode and run the tests.
+Then install and run the tests.
 
 .. code-block:: console
 
-    pip install -e .[test]
-    py.test
+    uv run --extra dev -m pytest
 
 Unicode version upgrade
 -----------------------
@@ -134,6 +135,6 @@ The steps necessary for this:
 2. Download the `data files <http://www.unicode.org/Public/>`_ from unicode into the unicode-data folder.
    For the given version, some are in `ucd` and some are in `ucd/auxiliary`.
 3. Run `make process-data-files` to parse those files (will update the
-   `grapheme_break_property.json` file).
+   `grapheme_break_property.json` and `derived_core_property.json` files).
 4. Update the unicode version in the documentation and in the source code.
 5. Bump the version.

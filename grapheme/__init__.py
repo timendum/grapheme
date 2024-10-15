@@ -7,15 +7,15 @@ Main module for the grapheme package.
 """
 
 from .api import (
+    UNICODE_VERSION,
+    contains,
+    endswith,
+    grapheme_lengths,
     graphemes,
     length,
-    grapheme_lengths,
-    slice,
-    contains,
     safe_split_index,
+    slice,
     startswith,
-    endswith,
-    UNICODE_VERSION,
 )
 
 __all__ = [
