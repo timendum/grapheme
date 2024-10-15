@@ -1,6 +1,6 @@
+import timeit
 from random import choice
 from string import ascii_lowercase
-import timeit
 
 
 def random_ascii_string(n):
@@ -27,4 +27,4 @@ for statement, n in statements:
         )
         / 100
     )
-    print("{}: {} seconds".format(statement, result / n))
+    print(f"{statement}: {result / n} seconds")

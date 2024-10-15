@@ -3,7 +3,6 @@ import os
 import re
 from collections import defaultdict
 
-
 BREAK_PROPERTY_FILE = "GraphemeBreakProperty.txt"
 EMOJI_DATA_FILE = "emoji-data.txt"
 BREAK_PROPERTY_JSON_FILE = "../grapheme/data/grapheme_break_property.json"
@@ -21,12 +20,12 @@ class Group:
 
 
 def group():
-    return dict(single_chars=[], ranges=[])
+    return {"single_chars": [], "ranges": []}
 
 
 chardata = defaultdict(group)
 
-with open(os.path.join(dir_path, BREAK_PROPERTY_FILE), "r") as file:
+with open(os.path.join(dir_path, BREAK_PROPERTY_FILE)) as file:
     for line in file:
         if line.startswith("#"):
             continue
@@ -43,7 +42,7 @@ with open(os.path.join(dir_path, BREAK_PROPERTY_FILE), "r") as file:
             chardata[group_name]["ranges"].append((int(start, 16), int(end, 16)))
 
 # Find characters with Extended_Pictographic flag from the emoji data file
-with open(os.path.join(dir_path, EMOJI_DATA_FILE), "r") as file:
+with open(os.path.join(dir_path, EMOJI_DATA_FILE)) as file:
     for line in file:
         match = pattern.search(line)
         if not match:
@@ -65,7 +64,8 @@ def optimize_groups(chardata):
         single_chars = group["single_chars"]
         ranges = []
         last_max = None
-        for min_, max_ in sorted(group["ranges"]):
+        for smin_, smax_ in sorted(group["ranges"]):
+            min_, max_ = smin_, smax_
             # Extend range with adjacent single chars
             while min_ - 1 in single_chars:
                 min_ -= 1
@@ -94,7 +94,7 @@ optimize_groups(chardata)
 
 
 # Find characters with Indic_Conjunct_Break flag from the DerivedCoreProperties data file
-with open(os.path.join(dir_path, DERIVED_PROPERTY_FILE), "r") as file:
+with open(os.path.join(dir_path, DERIVED_PROPERTY_FILE)) as file:
     for line in file:
         match = pattern.search(line)
         if not match:
@@ -108,9 +108,7 @@ with open(os.path.join(dir_path, DERIVED_PROPERTY_FILE), "r") as file:
         if end is None:
             chardata[group_name + ext_group_name]["single_chars"].append(int(start, 16))
         else:
-            chardata[group_name + ext_group_name]["ranges"].append(
-                (int(start, 16), int(end, 16))
-            )
+            chardata[group_name + ext_group_name]["ranges"].append((int(start, 16), int(end, 16)))
 
 with open(os.path.join(dir_path, DERIVED_PROPERTY_JSON_FILE), "w") as out_file:
     out_file.write(json.dumps(chardata, indent=2))

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # grapheme documentation build configuration file, created by
 # sphinx-quickstart on Mon Jul 24 23:09:29 2017.

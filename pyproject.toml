@@ -49,5 +49,5 @@ lint.select = [
     "PLE",
     "PLW",
 ]
-lint.ignore = []
+lint.ignore = ["ISC001"]
 line-length = 100
