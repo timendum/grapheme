@@ -15,6 +15,8 @@ Or similar.
 
 The currently supported version of Unicode: 16.0.0.
 
+This package is a fork of `grapheme <https://github.com/alvinlindstam/grapheme>`_ by Alvin Lindstam.
+
 What? Why?
 ==========
 
