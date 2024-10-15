@@ -189,7 +189,7 @@ def safe_split_index(string, max_len):
     the exact grapheme length, but don't want to risk breaking existing graphemes.
 
     This function does normally not traverse the full grapheme sequence up to the given length,
-    so it can be used for arbitrarily long strings and high `max_len`s.
+    so it can be used for arbitrarily long strings and high `max_len`.
     However, some grapheme boundaries depend on the previous state,
     so the worst case performance is O(n). In practice, it's only very long non-broken sequences
     of country flags (represented as Regional Indicators) that will perform badly.

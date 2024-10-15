@@ -22,6 +22,7 @@ Documentation = "https://graphemeu.readthedocs.io/"
 
 [project.optional-dependencies]
 dev = ["pytest"]
+docs = ["sphinx", "sphinx-autobuild"]
 
 [build-system]
 requires = ["hatchling"]

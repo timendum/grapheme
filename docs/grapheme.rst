@@ -1,4 +1,4 @@
-grapheme (API documentation)
+graphemeu (API documentation)
 ====================================
 
 .. automodule:: grapheme

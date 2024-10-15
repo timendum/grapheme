@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-grapheme
+graphemeu
 ====================================
 
 .. toctree::
@@ -23,6 +23,9 @@ Pythons built in string functions work with unicode code points as the basic
 unit, so lengths, slicing, matching etc is done on the code points. This
 module adds helper functions for common string operations with respect to
 graphemes instead.
+
+The module is called `graphemeu` because it's a fork of the original
+`grapheme` library by Alvin Lindstam.
 
 
 Indices and tables

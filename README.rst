@@ -123,6 +123,12 @@ Then install and run the tests.
 
     uv run --extra dev -m pytest
 
+For the documentation, use:
+
+.. code-block:: console
+
+    uv run --extra docs sphinx-autobuild docs dist/www
+
 Unicode version upgrade
 -----------------------
 
