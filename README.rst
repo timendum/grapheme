@@ -88,15 +88,15 @@ time for some possible calls is roughly:
 ================================================================  ==========================
 Code                                                              Approximate execution time
 ================================================================  ==========================
-`len(long_ascii_string)`                                          8.1e-10 seconds
-`grapheme.length(long_ascii_string)`                              1.5e-04 seconds
-`grapheme.length(long_ascii_string, 500)`                         8.7e-06 seconds
+`len(long_ascii_string)`                                          3.0e-10 seconds
+`grapheme.length(long_ascii_string)`                              4.3e-05 seconds
+`grapheme.length(long_ascii_string, 500)`                         2.6e-06 seconds
 `long_ascii_string[0:100]`                                        1.3e-09 seconds
-`grapheme.slice(long_ascii_string, 0, 100)`                       2.5e-06 seconds
-`long_ascii_string[:100] in long_ascii_string`                    4.0e-09 seconds
-`grapheme.contains(long_ascii_string, long_ascii_string[:100])`   3.9e-06 seconds
-`long_ascii_string[-100:] in long_ascii_string`                   2.1e-07 seconds
-`grapheme.contains(long_ascii_string, long_ascii_string[-100:])`  1.9e-04 seconds
+`grapheme.slice(long_ascii_string, 0, 100)`                       6.3e-07 seconds
+`long_ascii_string[:100] in long_ascii_string`                    7.8e-09 seconds
+`grapheme.contains(long_ascii_string, long_ascii_string[:100])`   9.9e-07 seconds
+`long_ascii_string[-100:] in long_ascii_string`                   2.0e-08 seconds
+`grapheme.contains(long_ascii_string, long_ascii_string[-100:])`  6.9e-05 seconds
 ================================================================  ==========================
 
 Execution times may improve in later releases, but calculating graphemes is and will continue
