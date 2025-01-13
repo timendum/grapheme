@@ -1,10 +1,9 @@
 [project]
 name = "graphemeu"
-version = "0.7.0"
+version = "0.7.1"
 description = "Unicode grapheme helpers"
 readme = "README.rst"
 requires-python = ">=3.7"
-dependencies = []
 authors = [{ name = "Alvin Lindstam", email = "alvin.lindstam@gmail.com" }]
 maintainers = [{ name = "Timendum" }]
 license = { file = "LICENSE" }
