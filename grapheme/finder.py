@@ -196,7 +196,7 @@ class GraphemeIterator:
             next_state = UState.GB11_Picto
         elif nextg is GraphGroup.REGIONAL_INDICATOR:
             next_state = UState.GB12_First
-        elif nextg is InCBGroup.CONSONANT:
+        elif nextincb is InCBGroup.CONSONANT:
             next_state = UState.GB9c_Consonant
         return should_break, next_state
 
