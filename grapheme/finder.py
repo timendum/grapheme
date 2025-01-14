@@ -192,7 +192,7 @@ class GraphemeIterator:
             # Do not break after Prepend characters
             should_break = False
         # Next State
-        elif nextg is GraphGroup.EXTENDED_PICTOGRAPHIC:
+        if nextg is GraphGroup.EXTENDED_PICTOGRAPHIC:
             next_state = UState.GB11_Picto
         elif nextg is GraphGroup.REGIONAL_INDICATOR:
             next_state = UState.GB12_First
