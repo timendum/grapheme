@@ -151,7 +151,7 @@ class GraphemeIterator:
         ):
             # GB999     Any ÷ Any
             # Otherwise, break everywhere
-            should_break = True
+            return True, UState.DEFAULT
         elif self.lastg is GraphGroup.CR and nextg is GraphGroup.LF:
             # GB3       CR × LF
             # Do not break between a CR and LF
@@ -192,7 +192,9 @@ class GraphemeIterator:
             # Do not break after Prepend characters
             should_break = False
         # Next State
-        if nextg is GraphGroup.EXTENDED_PICTOGRAPHIC:
+        if nextg is GraphGroup.OTHER and nextincb is InCBGroup.OTHER:
+            pass
+        elif nextg is GraphGroup.EXTENDED_PICTOGRAPHIC:
             next_state = UState.GB11_Picto
         elif nextg is GraphGroup.REGIONAL_INDICATOR:
             next_state = UState.GB12_First
