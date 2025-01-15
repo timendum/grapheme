@@ -1,3 +1,7 @@
+## 0.7.2
+Fix bug #2 found by alwaysmpe.
+No API changes.
+
 ## 0.7.1
 Fix bug #1 found by alwaysmpe.
 No API changes.
