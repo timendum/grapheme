@@ -6,7 +6,7 @@ readme = "README.rst"
 requires-python = ">=3.7"
 authors = [{ name = "Alvin Lindstam", email = "alvin.lindstam@gmail.com" }]
 maintainers = [{ name = "Timendum" }]
-license = { file = "LICENSE" }
+license = { text = "MIT", file = "LICENSE" }
 keywords = ["unicode", "grapheme"]
 classifiers = [
     "Development Status :: 4 - Beta",
