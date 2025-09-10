@@ -13,7 +13,7 @@ groups (graphemes) as defined by the `Unicode Standard Annex #29 <http://unicode
 
 Or similar.
 
-The currently supported version of Unicode: 16.0.0.
+The currently supported version of Unicode: 17.0.0.
 
 This package is a fork of `grapheme <https://github.com/alvinlindstam/grapheme>`_ by Alvin Lindstam.
 
