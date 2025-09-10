@@ -1,6 +1,6 @@
 [project]
 name = "graphemeu"
-version = "0.7.3"
+version = "0.8.0"
 description = "Unicode grapheme helpers"
 readme = "README.rst"
 requires-python = ">=3.8"

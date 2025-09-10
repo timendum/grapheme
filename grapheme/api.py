@@ -1,6 +1,6 @@
 from grapheme.finder import GraphemeIterator, get_last_certain_break_index
 
-UNICODE_VERSION = "16.0.0"
+UNICODE_VERSION = "17.0.0"
 
 
 def graphemes(string):
