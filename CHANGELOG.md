@@ -1,3 +1,7 @@
+## 0.8.1
+Fix bug #4 found by alwaysmpe.
+No API changes.
+
 ## 0.8.0
 Added support for Unicode 17.
 Changed supported python version. Now tested on python 3.8 - 3.13.

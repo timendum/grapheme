@@ -218,7 +218,7 @@ class GraphemeIterator:
                     next_state = UState.GB11_ZWJ
                     sb = False
             elif self.state is UState.GB11_ZWJ and nextg is GraphGroup.EXTENDED_PICTOGRAPHIC:
-                next_state = UState.DEFAULT
+                next_state = UState.GB11_Picto
                 sb = False
             # GB12  sot   (RI RI)* RI × RI
             # GB13  [^RI] (RI RI)* RI × RI
