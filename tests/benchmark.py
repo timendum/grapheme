@@ -23,7 +23,7 @@ statements = [
 for statement, n in statements:
     result = (
         timeit.timeit(
-            statement, setup="from __main__ import long_ascii_string; import grapheme", number=n
+            statement, setup=f"long_ascii_string = '{long_ascii_string}'; import grapheme", number=n
         )
         / 100
     )

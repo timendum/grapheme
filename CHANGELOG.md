@@ -1,3 +1,8 @@
+## 0.9.0
+Rewrite with match statement.
+Drops support for python 3.8 & 3.9. Minimum version: 3.10.
+No API changes.
+
 ## 0.8.1
 Fix bug #4 found by alwaysmpe.
 No API changes.

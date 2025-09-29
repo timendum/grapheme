@@ -24,6 +24,15 @@ class ResetStates(TestCase):
         input_str = extra_str + base_str
         self.assertEqual(list(graphemes(input_str)), list(extra_str) + [base_str])
 
+    def test_4(self):
+        # from https://github.com/timendum/grapheme/issues/4
+        base_str = "\u231a\u200d\u231a\u200d\u231a"
+        self.assertEqual(list(graphemes(base_str)), [base_str])
+        extra_str = "aa\n"
+        self.assertEqual(list(graphemes(extra_str)), list(extra_str))
+        input_str = extra_str + base_str
+        self.assertEqual(list(graphemes(input_str)), list(extra_str) + [base_str])
+
 
 if __name__ == "__main__":
     pytest.main()

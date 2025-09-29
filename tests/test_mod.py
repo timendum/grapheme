@@ -78,5 +78,6 @@ class GraphemesTest(TestCase):
         for i in range(len(graphemes) - 1):
             self.assertTrue(grapheme.contains(input_str, "".join(graphemes[i : i + 2])))
 
+
 if __name__ == "__main__":
     pytest.main()
