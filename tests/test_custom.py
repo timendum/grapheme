@@ -5,7 +5,7 @@ import pytest
 from grapheme.api import graphemes
 
 
-class ResetStates(TestCase):
+class CustomGraphemesCases(TestCase):
     def test_ascii_then_cblinker(self):
         # from https://github.com/timendum/grapheme/issues/1
         base_str = "\u0915\u093c\u200d\u094d\u0924"
@@ -24,9 +24,9 @@ class ResetStates(TestCase):
         input_str = extra_str + base_str
         self.assertEqual(list(graphemes(input_str)), list(extra_str) + [base_str])
 
-    def test_4(self):
+    def test_three_picto_joined(self):
         # from https://github.com/timendum/grapheme/issues/4
-        base_str = "\u231a\u200d\u231a\u200d\u231a"
+        base_str = "\U0001f469\u200d\U0001f469\u200d\U0001f467"
         self.assertEqual(list(graphemes(base_str)), [base_str])
         extra_str = "aa\n"
         self.assertEqual(list(graphemes(extra_str)), list(extra_str))
