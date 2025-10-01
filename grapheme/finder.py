@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from enum import Enum
 
 from grapheme.grapheme_property_group import GraphemePropertyGroup as GCB  # noqa: N814
@@ -12,7 +13,7 @@ class BreakPossibility(Enum):
     NO_BREAK = "nobreak"
 
 
-def get_break_possibility(a, b):
+def get_break_possibility(a, b) -> BreakPossibility:
     # Probably most common, included as short circuit before checking all else
     if a is GCB.OTHER and b is GCB.OTHER:
         return BreakPossibility.CERTAIN
@@ -65,7 +66,7 @@ def get_break_possibility(a, b):
     return BreakPossibility.CERTAIN
 
 
-def get_break_possibility_incb(a, b):
+def get_break_possibility_incb(a, b) -> BreakPossibility:
     # Probably most common, included as short circuit before checking all else
     if a is InCBGroup.OTHER and b is InCBGroup.OTHER:
         return BreakPossibility.CERTAIN
@@ -83,7 +84,7 @@ def get_break_possibility_incb(a, b):
     return BreakPossibility.POSSIBLE
 
 
-def get_last_certain_break_index(string, index):
+def get_last_certain_break_index(string, index) -> int:
     if index >= len(string):
         return len(string)
 
@@ -114,15 +115,15 @@ class UState(Enum):
 
 
 class GraphemeIterator:
-    def __init__(self, string: str):
+    def __init__(self, string: str) -> None:
         self.str_iter = iter(string)
-        self.buffer = ""
+        self.buffer: str = ""
         self.lastg = None
         self.state = UState.DEFAULT
         try:
             self.buffer = next(self.str_iter)
         except StopIteration:
-            self.buffer = None
+            self.buffer = ""
         else:
             lastg = get_group(self.buffer)
             self.lastg = lastg
@@ -135,10 +136,10 @@ class GraphemeIterator:
                 if lastincb is InCBGroup.CONSONANT:
                     self.state = UState.GB9c_Consonant
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return self
 
-    def __next__(self):
+    def __next__(self) -> str:
         for codepoint in self.str_iter:
             nextg = get_group(codepoint)
             next_inbc = get_group_incb(codepoint)
@@ -153,12 +154,11 @@ class GraphemeIterator:
         if self.buffer:
             # GB2  Any ÷ eot
             # Break at the end of text, unless the text is empty.
-            return self._break(None)
-
+            return self._break("")
         raise StopIteration()
 
     @staticmethod
-    def fsm(state, lastg, nextg, next_inbc):
+    def fsm(state, lastg, nextg, next_inbc) -> tuple[bool, UState]:
         do_break = True
         match (state, lastg, nextg, next_inbc):
             # First the most common
@@ -250,7 +250,7 @@ class GraphemeIterator:
                 state = UState.DEFAULT
         return do_break, state
 
-    def _break(self, new):
+    def _break(self, new: str) -> str:
         """Return the current buffer, start with a new one"""
         old_buffer = self.buffer
         self.buffer = new

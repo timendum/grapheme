@@ -1,9 +1,12 @@
+
+from collections.abc import Iterator
+
 from grapheme.finder import GraphemeIterator, get_last_certain_break_index
 
 UNICODE_VERSION = "17.0.0"
 
 
-def graphemes(string):
+def graphemes(string: str) -> Iterator[str]:
     """
     Returns an iterator of all graphemes of given string.
 
@@ -16,7 +19,7 @@ def graphemes(string):
     return iter(GraphemeIterator(string))
 
 
-def length(string, until=None):
+def length(string: str, until=None) -> int:
     """
     Returns the number of graphemes in the string.
 
@@ -54,14 +57,14 @@ def length(string, until=None):
 
 
 # TODO: should probably use an optimized iterator that only deals with code point counts
-def grapheme_lengths(string):
+def grapheme_lengths(string: str):
     """
     Returns an iterator of number of code points in each grapheme of the string.
     """
     return iter(len(g) for g in graphemes(string))
 
 
-def slice(string, start=None, end=None):
+def slice(string: str, start=None, end=None) -> str:
     """
     Returns a substring of the given string, counting graphemes instead of codepoints.
 
@@ -101,7 +104,7 @@ def slice(string, start=None, end=None):
     return ""
 
 
-def contains(string, substring):
+def contains(string: str, substring: str) -> bool:
     """
     Returns true if the sequence of graphemes in substring is also present in string.
 
@@ -146,7 +149,7 @@ def contains(string, substring):
         return str_sub_part == substr_graphemes
 
 
-def startswith(string, prefix):
+def startswith(string: str, prefix: str) -> bool:
     """
     Like str.startswith, but also checks that the string starts with the given prefixes sequence of
     graphemes.
@@ -162,7 +165,7 @@ def startswith(string, prefix):
     return string.startswith(prefix) and safe_split_index(string, len(prefix)) == len(prefix)
 
 
-def endswith(string, suffix):
+def endswith(string: str, suffix: str) -> bool:
     """
     Like str.endswith, but also checks that the string endswith the given prefixes sequence of
     graphemes.
@@ -179,7 +182,7 @@ def endswith(string, suffix):
     return string.endswith(suffix) and safe_split_index(string, expected_index) == expected_index
 
 
-def safe_split_index(string, max_len):
+def safe_split_index(string: str, max_len: int) -> int:
     """
     Returns the highest index up to `max_len` at which the given string can be sliced,
     without breaking a grapheme.
