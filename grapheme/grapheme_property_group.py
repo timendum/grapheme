@@ -3,7 +3,7 @@ import json
 import os
 import string
 from enum import Enum
-from typing import TypeVar, Type
+from typing import TypeVar
 
 
 class GraphemePropertyGroup(Enum):
