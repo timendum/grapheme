@@ -1,4 +1,3 @@
-
 from collections.abc import Iterator
 
 from grapheme.finder import GraphemeIterator, get_last_certain_break_index

@@ -1,7 +1,8 @@
+import bisect
 from enum import Enum
 from functools import lru_cache
 
-from grapheme.grapheme_property_group import ContainerNode, LeafNode, load_file
+from grapheme.grapheme_property_group import load_file
 
 
 class InCBPropertyGroup(Enum):
@@ -12,9 +13,9 @@ class InCBPropertyGroup(Enum):
     OTHER = "Other"
 
 
-SINGLE_CHAR_MAPPINGS = {}
-
-RANGE_TREE = ContainerNode([LeafNode(0, 0, None)])
+COMMON_OTHER_GROUP_CHARS = ""
+RANGE_TREE: tuple[list[int], list[tuple[int, int, InCBPropertyGroup]]] = ([], [])
+SINGLE_CHAR_MAPPINGS = dict[int, InCBPropertyGroup]()
 
 
 def get_group(char):
@@ -29,7 +30,11 @@ def get_group_ord(char):
     if group:
         return group
 
-    return RANGE_TREE.get_value(char) or InCBPropertyGroup.OTHER
+    # Find the rightmost interval whose min <= x
+    i = bisect.bisect_right(RANGE_TREE[0], char) - 1
+    if i >= 0 and RANGE_TREE[1][i][0] <= char <= RANGE_TREE[1][i][1]:
+        return RANGE_TREE[1][i][2]
+    return InCBPropertyGroup.OTHER
 
 
 SINGLE_CHAR_MAPPINGS, RANGE_TREE, COMMON_OTHER_GROUP_CHARS = load_file(

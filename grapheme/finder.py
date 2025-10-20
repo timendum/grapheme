@@ -13,78 +13,63 @@ class BreakPossibility(Enum):
     NO_BREAK = "nobreak"
 
 
-def get_break_possibility(a, b) -> BreakPossibility:
-    # Probably most common, included as short circuit before checking all else
-    if a is GCB.OTHER and b is GCB.OTHER:
-        return BreakPossibility.CERTAIN
-
-    assert isinstance(a, GCB)
-    assert isinstance(b, GCB)
-
-    # Only break if preceeded by an uneven number of REGIONAL_INDICATORS
-    # sot (RI RI)* RI × RI
-    # [^RI] (RI RI) * RI × RI
-    if a is GCB.REGIONAL_INDICATOR and b is GCB.REGIONAL_INDICATOR:
-        return BreakPossibility.POSSIBLE
-
-    # (Control | CR | LF) ÷
-    #  ÷ (Control | CR | LF)
-    if a in [GCB.CONTROL, GCB.CR, GCB.LF] or b in [
-        GCB.CONTROL,
-        GCB.CR,
-        GCB.LF,
-    ]:
-        # CR × LF
-        if a is GCB.CR and b is GCB.LF:
-            return BreakPossibility.NO_BREAK
-        else:
+def get_break_possibility(a: GCB, b: GCB) -> BreakPossibility:
+    match (a, b):
+        case (GCB.OTHER, GCB.OTHER):
+            # Probably most common, included as short circuit before checking all else
             return BreakPossibility.CERTAIN
-
-    # L × (L | V | LV | LVT)
-    if a is GCB.L and b in [GCB.L, GCB.V, GCB.LV, GCB.LVT]:
-        return BreakPossibility.NO_BREAK
-
-    # (LV | V) × (V | T)
-    if a in [GCB.LV, GCB.V] and b in [GCB.V, GCB.T]:
-        return BreakPossibility.NO_BREAK
-
-    # (LVT | T)    ×    T
-    if a in [GCB.LVT, GCB.T] and b is GCB.T:
-        return BreakPossibility.NO_BREAK
-
-    # × (Extend | ZWJ)
-    # × SpacingMark
-    # Prepend ×
-    if b in [GCB.EXTEND, GCB.ZWJ, GCB.SPACING_MARK] or a is GCB.PREPEND:
-        return BreakPossibility.NO_BREAK
-
-    # \p{Extended_Pictographic} Extend* ZWJ × \p{Extended_Pictographic}
-    if a is GCB.ZWJ and b is GCB.EXTENDED_PICTOGRAPHIC:
-        return BreakPossibility.POSSIBLE
+        case (GCB.REGIONAL_INDICATOR, GCB.REGIONAL_INDICATOR):
+            # Only break if preceeded by an uneven number of REGIONAL_INDICATORS
+            # sot (RI RI)* RI × RI
+            # [^RI] (RI RI) * RI × RI
+            return BreakPossibility.POSSIBLE
+        case (GCB.CONTROL | GCB.CR | GCB.LF, GCB.CONTROL | GCB.CR | GCB.LF):
+            # (Control | CR | LF) ÷
+            #  ÷ (Control | CR | LF)
+            if a is GCB.CR and b is GCB.LF:
+                # CR × LF
+                return BreakPossibility.NO_BREAK
+            else:
+                return BreakPossibility.CERTAIN
+        case (GCB.L, GCB.L | GCB.V | GCB.LV | GCB.LVT):
+            # L × (L | V | LV | LVT)
+            return BreakPossibility.NO_BREAK
+        case (GCB.LV | GCB.V, GCB.V | GCB.T):
+            # (LV | V) × (V | T)
+            return BreakPossibility.NO_BREAK
+        case (GCB.LVT | GCB.T, GCB.T):
+            # (LVT | T)    ×    T
+            return BreakPossibility.NO_BREAK
+        case (_, GCB.EXTEND | GCB.ZWJ | GCB.SPACING_MARK):
+            # × (Extend | ZWJ)
+            # × SpacingMark
+            return BreakPossibility.NO_BREAK
+        case (GCB.PREPEND, _):
+            # Prepend ×
+            return BreakPossibility.NO_BREAK
+        case (GCB.ZWJ, GCB.EXTENDED_PICTOGRAPHIC):
+            # \p{Extended_Pictographic} Extend* ZWJ × \p{Extended_Pictographic}
+            return BreakPossibility.POSSIBLE
 
     # everything else, assumes all other rules are included above
     return BreakPossibility.CERTAIN
 
 
-def get_break_possibility_incb(a, b) -> BreakPossibility:
-    # Probably most common, included as short circuit before checking all else
-    if a is InCBGroup.OTHER and b is InCBGroup.OTHER:
-        return BreakPossibility.CERTAIN
-
-    if a in [InCBGroup.LINKER, InCBGroup.EXTEND] and b is InCBGroup.CONSONANT:
-        return BreakPossibility.NO_BREAK
-
-    if a in [InCBGroup.LINKER, InCBGroup.EXTEND, InCBGroup.CONSONANT] and b is InCBGroup.LINKER:
-        return BreakPossibility.NO_BREAK
-
-    assert isinstance(a, InCBGroup)
-    assert isinstance(b, InCBGroup)
+def get_break_possibility_incb(a: InCBGroup, b: InCBGroup) -> BreakPossibility:
+    match (a, b):
+        case (InCBGroup.OTHER, InCBGroup.OTHER):
+            # Probably most common, included as short circuit before checking all else
+            return BreakPossibility.CERTAIN
+        case (InCBGroup.LINKER | InCBGroup.EXTEND, InCBGroup.CONSONANT):
+            return BreakPossibility.NO_BREAK
+        case (InCBGroup.LINKER | InCBGroup.EXTEND | InCBGroup.CONSONANT, InCBGroup.LINKER):
+            return BreakPossibility.NO_BREAK
 
     # everything else, assumes all other rules are included above
     return BreakPossibility.POSSIBLE
 
 
-def get_last_certain_break_index(string, index) -> int:
+def get_last_certain_break_index(string: str, index: int) -> int:
     if index >= len(string):
         return len(string)
 
@@ -98,7 +83,7 @@ def get_last_certain_break_index(string, index) -> int:
         cur_incb = get_group_incb(string[index])
         if (
             get_break_possibility(cur, prev) == BreakPossibility.CERTAIN
-            and get_break_possibility_incb(cur_incb, prev_incb) != BreakPossibility.NO_BREAK
+            and get_break_possibility_incb(cur_incb, prev_incb) == BreakPossibility.CERTAIN
         ):
             return index + 1
         prev = cur
@@ -118,7 +103,7 @@ class GraphemeIterator:
     def __init__(self, string: str) -> None:
         self.str_iter = iter(string)
         self.buffer: str = ""
-        self.lastg = None
+        self.lastg: GCB | None = None
         self.state = UState.DEFAULT
         try:
             self.buffer = next(self.str_iter)
