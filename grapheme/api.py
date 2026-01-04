@@ -103,7 +103,60 @@ def slice(string: str, start=None, end=None) -> str:
     return ""
 
 
-def contains(string: str, substring: str) -> bool:
+def index(string, substring):
+    """
+    Returns the grapheme index of substring in string, or -1 if not found.
+
+    This differs from the normal str.index, since str.index returns the codepoint index and
+    str.index does not consider grapheme boundaries.
+
+    Performance notes: Very fast if `substring not in string`, since that also means that
+    the same graphemes can not be in the two strings. Otherwise this function has linear time
+    complexity in relation to the string length. It will traverse the sequence of graphemes until
+    a match is found, so it will generally perform better for grapheme sequences that match early.
+
+    >>> "🇪🇸🇪🇪".index("🇸🇪") # str.index doesn't consider grapheme boundaries and therefore matches
+    1
+    >>> grapheme.index("🇪🇸🇪🇪", "🇸🇪") # grapheme.index considers grapheme boundaries and therefore doesn't match
+    -1
+    >>> "a🇪🇸🇪🇪".index("🇪🇪") # str.index returns codepoint index
+    3
+    >>> grapheme.index("a🇪🇸🇪🇪", "🇪🇪") # grapheme.index returns grapheme index
+    2
+    """
+    if substring not in string:
+        return -1
+
+    substr_graphemes = list(graphemes(substring))
+
+    if len(substr_graphemes) == 0:
+        return 0
+    elif len(substr_graphemes) == 1:
+        for i, g in enumerate(graphemes(string)):
+            if g == substr_graphemes[0]:
+                return i
+        return -1
+    else:
+        str_iter = graphemes(string)
+        str_sub_part = []
+        for _ in range(len(substr_graphemes)):
+            try:
+                str_sub_part.append(next(str_iter))
+            except StopIteration:
+                return -1
+
+        idx = 0
+        for g in str_iter:
+            if str_sub_part == substr_graphemes:
+                return idx
+
+            str_sub_part.append(g)
+            str_sub_part.pop(0)
+            idx += 1
+        return idx if str_sub_part == substr_graphemes else -1
+
+
+def contains(string, substring):
     """
     Returns true if the sequence of graphemes in substring is also present in string.
 
@@ -121,31 +174,7 @@ def contains(string: str, substring: str) -> bool:
     >>> grapheme.contains("🇪🇸🇪🇪", "🇸🇪")
     False
     """
-    if substring not in string:
-        return False
-
-    substr_graphemes = list(graphemes(substring))
-
-    if len(substr_graphemes) == 0:
-        return True
-    elif len(substr_graphemes) == 1:
-        return substr_graphemes[0] in graphemes(string)
-    else:
-        str_iter = graphemes(string)
-        str_sub_part = []
-        for _ in range(len(substr_graphemes)):
-            try:
-                str_sub_part.append(next(str_iter))
-            except StopIteration:
-                return False
-
-        for g in str_iter:
-            if str_sub_part == substr_graphemes:
-                return True
-
-            str_sub_part.append(g)
-            str_sub_part.pop(0)
-        return str_sub_part == substr_graphemes
+    return index(string, substring) != -1
 
 
 def startswith(string: str, prefix: str) -> bool:
