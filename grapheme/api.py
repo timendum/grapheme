@@ -68,8 +68,8 @@ def slice(string: str, start=None, end=None) -> str:
     Returns a substring of the given string, counting graphemes instead of codepoints.
 
     Negative indices is currently not supported.
-    >>> string = "tamil நி (ni)"
 
+    >>> string = "tamil நி (ni)"
     >>> string[:7]
     'tamil ந'
     >>> grapheme.slice(string, end=7)
