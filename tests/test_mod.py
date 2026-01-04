@@ -63,6 +63,23 @@ class GraphemesTest(TestCase):
         self.assertEqual(grapheme.length(input_str, until=10), 10)
         self.assertEqual(grapheme.length(input_str, until=11), 10)
 
+    def test_index(self):
+        input_str = " \U0001F476\U0001F3FB ascii \u000D\u000A"
+
+        self.assertEqual(grapheme.index(input_str, " \U0001F476"), -1)
+        self.assertEqual(grapheme.index(input_str, "\u000D"), -1)
+        self.assertEqual(grapheme.index(input_str, "\U0001F3FB"), -1)
+        self.assertEqual(grapheme.index(input_str, ""), 0)
+
+        graphemes_list = list(grapheme.graphemes(input_str))
+        first_occurrence = {g: i for i, g in reversed(list(enumerate(graphemes_list)))}
+
+        for g, i in first_occurrence.items():
+            self.assertEqual(grapheme.index(input_str, g), i)
+
+        for i in range(len(graphemes_list) - 1):
+            self.assertEqual(grapheme.index(input_str, "".join(graphemes_list[i:i+2])), i)
+
     def test_contains(self):
         input_str = " \U0001f476\U0001f3fb ascii \u000d\u000a"
 
