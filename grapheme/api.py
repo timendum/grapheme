@@ -115,14 +115,14 @@ def index(string, substring):
     complexity in relation to the string length. It will traverse the sequence of graphemes until
     a match is found, so it will generally perform better for grapheme sequences that match early.
 
-    >>> "🇪🇸🇪🇪".index("🇸🇪") # str.index doesn't consider grapheme boundaries and therefore matches
-    1
-    >>> grapheme.index("🇪🇸🇪🇪", "🇸🇪") # grapheme.index considers grapheme boundaries and therefore doesn't match
-    -1
-    >>> "a🇪🇸🇪🇪".index("🇪🇪") # str.index returns codepoint index
-    3
-    >>> grapheme.index("a🇪🇸🇪🇪", "🇪🇪") # grapheme.index returns grapheme index
-    2
+    >>> "🇪🇸🇪🇪".index("🇸🇪")
+    1  # str.index doesn't consider grapheme boundaries and therefore matches
+    >>> grapheme.index("🇪🇸🇪🇪", "🇸🇪")
+    -1 # grapheme.index considers grapheme boundaries and therefore doesn't match
+    >>> "a🇪🇸🇪🇪".index("🇪🇪")
+    3  # str.index returns codepoint index
+    >>> grapheme.index("a🇪🇸🇪🇪", "🇪🇪")
+    2  # grapheme.index returns grapheme index
     """
     if substring not in string:
         return -1
@@ -130,6 +130,7 @@ def index(string, substring):
     substr_graphemes = list(graphemes(substring))
 
     if len(substr_graphemes) == 0:
+        # parity with str.index("") behavior
         return 0
     elif len(substr_graphemes) == 1:
         for i, g in enumerate(graphemes(string)):
@@ -138,21 +139,22 @@ def index(string, substring):
         return -1
     else:
         str_iter = graphemes(string)
-        str_sub_part = []
+        str_sub_part = []  # sliding window of graphemes from string with length of substring
         for _ in range(len(substr_graphemes)):
             try:
                 str_sub_part.append(next(str_iter))
             except StopIteration:
+                # string is shorter than substring
                 return -1
 
-        idx = 0
-        for g in str_iter:
+        for idx, g in enumerate(str_iter):
             if str_sub_part == substr_graphemes:
                 return idx
 
+            # slide window: remove first grapheme and add next grapheme from string to the end
             str_sub_part.append(g)
             str_sub_part.pop(0)
-            idx += 1
+        idx += 1
         return idx if str_sub_part == substr_graphemes else -1
 
 
