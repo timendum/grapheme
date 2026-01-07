@@ -1,3 +1,7 @@
+## TBR
+Added a new function by UmerHA: `grapheme.index`, which return the index of a grapheme in string.
+Fix in the documentation also by UmerHA.
+
 ## 0.9.0
 Rewrite with match statement.
 Drops support for python 3.8 & 3.9. Minimum version: 3.10.
