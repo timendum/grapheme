@@ -76,6 +76,16 @@ def test_suffixes(input_string, expected_graphemes, description):
         suffix = input_string[i:]
         assert grapheme.endswith(input_string, suffix) == (suffix in allowed_suffixes)
 
+@pytest.mark.parametrize("input_string,expected_graphemes,description", TEST_CASES)
+def test_index(input_string, expected_graphemes, description):
+    seen = set()
+    for idx, expected_grapheme in enumerate(expected_graphemes):
+        if expected_grapheme in seen:
+            continue
+        found_idx = grapheme.index(input_string, expected_grapheme)
+        assert found_idx == idx, f"Failed to find {expected_grapheme} in {input_string} at {idx}"
+        seen.add(expected_grapheme)
+
 
 if __name__ == "__main__":
     pytest.main()
