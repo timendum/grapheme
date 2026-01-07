@@ -76,6 +76,7 @@ def test_suffixes(input_string, expected_graphemes, description):
         suffix = input_string[i:]
         assert grapheme.endswith(input_string, suffix) == (suffix in allowed_suffixes)
 
+
 @pytest.mark.parametrize("input_string,expected_graphemes,description", TEST_CASES)
 def test_index(input_string, expected_graphemes, description):
     seen = set()
