@@ -56,7 +56,7 @@ def length(string: str, until=None) -> int:
 
 
 # TODO: should probably use an optimized iterator that only deals with code point counts
-def grapheme_lengths(string: str):
+def grapheme_lengths(string: str) -> Iterator[int]:
     """
     Returns an iterator of number of code points in each grapheme of the string.
     """
@@ -103,7 +103,7 @@ def slice(string: str, start=None, end=None) -> str:
     return ""
 
 
-def index(string, substring):
+def index(string: str, substring: str) -> int:
     """
     Returns the grapheme index of substring in string, or -1 if not found.
 
@@ -158,7 +158,7 @@ def index(string, substring):
         return idx if str_sub_part == substr_graphemes else -1
 
 
-def contains(string, substring):
+def contains(string: str, substring: str) -> bool:
     """
     Returns true if the sequence of graphemes in substring is also present in string.
 
