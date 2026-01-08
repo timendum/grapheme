@@ -56,6 +56,13 @@ class GraphemesTest(TestCase):
         self.assertEqual(grapheme.slice(input_str, 1, 4), "\U0001f476\U0001f3fb a")
         self.assertEqual(grapheme.slice(input_str, 2), input_str[3:])
         self.assertEqual(grapheme.slice(input_str, 2, 4), " a")
+        # start > end
+        self.assertEqual(grapheme.slice(input_str, 4, 2), "")
+        # start < 0
+        with self.assertRaises(NotImplementedError):
+            grapheme.slice(input_str, -1)
+        # start > len
+        self.assertEqual(grapheme.slice(input_str, len(graphemes) + 1), "")
         self.assertEqual(grapheme.length(input_str), 10)
         self.assertEqual(grapheme.length(input_str, until=0), 0)
         self.assertEqual(grapheme.length(input_str, until=1), 1)
@@ -66,6 +73,8 @@ class GraphemesTest(TestCase):
     def test_index(self):
         input_str = " \U0001f476\U0001f3fb ascii \u000d\u000a"
 
+        self.assertEqual(grapheme.index(input_str, "banana"), -1)
+        self.assertEqual(grapheme.index(input_str, input_str + input_str), -1)
         self.assertEqual(grapheme.index(input_str, " \U0001f476"), -1)
         self.assertEqual(grapheme.index(input_str, "\u000d"), -1)
         self.assertEqual(grapheme.index(input_str, "\U0001f3fb"), -1)
