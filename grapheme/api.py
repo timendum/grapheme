@@ -63,7 +63,7 @@ def grapheme_lengths(string: str) -> Iterator[int]:
     return iter(len(g) for g in graphemes(string))
 
 
-def slice(string: str, start=None, end=None) -> str:
+def slice(string: str, start: int | None = None, end: int | None = None) -> str:
     """
     Returns a substring of the given string, counting graphemes instead of codepoints.
 
@@ -142,7 +142,7 @@ def index(string: str, substring: str) -> int:
         str_sub_part = []  # sliding window of graphemes from string with length of substring
         for _ in range(len(substr_graphemes)):
             try:
-                str_sub_part.append(next(str_iter))
+            str_sub_part.append(next(str_iter))
             except StopIteration:
                 # string is shorter than substring
                 return -1
