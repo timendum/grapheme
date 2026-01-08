@@ -20,7 +20,7 @@ Homepage = "https://github.com/timendum/grapheme"
 Documentation = "https://graphemeu.readthedocs.io/"
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "pytest-cov"]
 docs = ["sphinx", "sphinx-autobuild"]
 
 [build-system]
@@ -50,3 +50,6 @@ lint.select = [
 ]
 lint.ignore = ["ISC001"]
 line-length = 100
+
+[tool.pytest.ini_options]
+addopts = "--cov=grapheme tests"

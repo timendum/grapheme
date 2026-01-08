@@ -33,5 +33,9 @@ jobs:
         run: uvx ruff check .
       - name: Format with ruff
         run: uvx ruff format --check .
-      - name: Test with unittest
-        run: uv run --extra dev -m pytest
+      - name: Test with unittest and coverage
+        run: uv run --extra dev -m pytest --cov-report=xml --cov-report=term
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
