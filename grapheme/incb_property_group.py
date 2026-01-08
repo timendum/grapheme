@@ -36,8 +36,7 @@ def get_group_ord(char):
         return RANGE_TREE[1][i][2]
     return InCBPropertyGroup.OTHER
 
-SINGLE_CHAR_MAPPINGS, RANGE_TREE = load_file(
-    "data/derived_core_property.json", InCBPropertyGroup
-)
+
+SINGLE_CHAR_MAPPINGS, RANGE_TREE = load_file("data/derived_core_property.json", InCBPropertyGroup)
 
 COMMON_OTHER_GROUP_CHARS = generate_common(get_group_ord, InCBPropertyGroup)

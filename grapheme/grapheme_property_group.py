@@ -82,10 +82,8 @@ def load_file(
     raw_ranges.sort(key=lambda key: key[0])
     del data
 
-    return (
-        single_char_mappings,
-        ([a[0] for a in raw_ranges], raw_ranges)
-    )
+    return (single_char_mappings, ([a[0] for a in raw_ranges], raw_ranges))
+
 
 def generate_common(e_get_group_ord: Callable[[int], T], enumgroup: type[T]) -> str:
     common_ascii = string.ascii_letters + string.digits + string.punctuation + " "
@@ -93,6 +91,7 @@ def generate_common(e_get_group_ord: Callable[[int], T], enumgroup: type[T]) -> 
         c for c in common_ascii if (e_get_group_ord(ord(c))) == enumgroup("Other")
     )
     return common_other_group_chars
+
 
 SINGLE_CHAR_MAPPINGS, RANGE_TREE = load_file(
     "data/grapheme_break_property.json", GraphemePropertyGroup
