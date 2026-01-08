@@ -141,11 +141,8 @@ def index(string: str, substring: str) -> int:
         str_iter = graphemes(string)
         str_sub_part = []  # sliding window of graphemes from string with length of substring
         for _ in range(len(substr_graphemes)):
-            try:
             str_sub_part.append(next(str_iter))
-            except StopIteration:
-                # string is shorter than substring
-                return -1
+            # substring is in string (first check), so `str_iter` never stops before
 
         for idx, g in enumerate(str_iter):
             if str_sub_part == substr_graphemes:
