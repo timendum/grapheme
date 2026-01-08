@@ -2,6 +2,7 @@ import bisect
 import json
 import os
 import string
+from collections.abc import Callable
 from enum import Enum
 from typing import TypeVar
 
@@ -54,7 +55,7 @@ T = TypeVar("T", bound=Enum, contravariant=True)
 
 def load_file(
     filename: str, enumgroup: type[T]
-) -> tuple[dict[int, T], tuple[list[int], list[tuple[int, int, T]]], str]:
+) -> tuple[dict[int, T], tuple[list[int], list[tuple[int, int, T]]]]:
     with open(os.path.join(os.path.dirname(__file__), filename)) as f:
         data = json.load(f)
 
@@ -80,18 +81,21 @@ def load_file(
             raw_ranges.append((min_, max_, group))
     raw_ranges.sort(key=lambda key: key[0])
     del data
-    common_ascii = string.ascii_letters + string.digits + string.punctuation + " "
-    common_other_group_chars = "".join(
-        c for c in common_ascii if get_group_ord(ord(c)) == enumgroup("Other")
-    )
 
     return (
         single_char_mappings,
-        ([a[0] for a in raw_ranges], raw_ranges),
-        common_other_group_chars,
+        ([a[0] for a in raw_ranges], raw_ranges)
     )
 
+def generate_common(e_get_group_ord: Callable[[int], T], enumgroup: type[T]) -> str:
+    common_ascii = string.ascii_letters + string.digits + string.punctuation + " "
+    common_other_group_chars = "".join(
+        c for c in common_ascii if (e_get_group_ord(ord(c))) == enumgroup("Other")
+    )
+    return common_other_group_chars
 
-SINGLE_CHAR_MAPPINGS, RANGE_TREE, COMMON_OTHER_GROUP_CHARS = load_file(
+SINGLE_CHAR_MAPPINGS, RANGE_TREE = load_file(
     "data/grapheme_break_property.json", GraphemePropertyGroup
 )
+
+COMMON_OTHER_GROUP_CHARS = generate_common(get_group_ord, GraphemePropertyGroup)

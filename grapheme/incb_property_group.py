@@ -2,7 +2,7 @@ import bisect
 from enum import Enum
 from functools import lru_cache
 
-from grapheme.grapheme_property_group import load_file
+from grapheme.grapheme_property_group import generate_common, load_file
 
 
 class InCBPropertyGroup(Enum):
@@ -36,7 +36,8 @@ def get_group_ord(char):
         return RANGE_TREE[1][i][2]
     return InCBPropertyGroup.OTHER
 
-
-SINGLE_CHAR_MAPPINGS, RANGE_TREE, COMMON_OTHER_GROUP_CHARS = load_file(
+SINGLE_CHAR_MAPPINGS, RANGE_TREE = load_file(
     "data/derived_core_property.json", InCBPropertyGroup
 )
+
+COMMON_OTHER_GROUP_CHARS = generate_common(get_group_ord, InCBPropertyGroup)
