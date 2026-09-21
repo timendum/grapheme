@@ -1,3 +1,6 @@
+## 0.11.0
+Added support for Unicode 18, updated Rule GB9c.
+
 ## 0.10.0
 Added a new function by UmerHA: `grapheme.index`, which return the index of a grapheme in string.
 Improved preformance, rewrite COMMON_OTHER_GROUP_CHARS generation, it did not work for incb groups.

@@ -23,14 +23,13 @@ def get_break_possibility(a: GCB, b: GCB) -> BreakPossibility:
             # sot (RI RI)* RI × RI
             # [^RI] (RI RI) * RI × RI
             return BreakPossibility.POSSIBLE
+        case (GCB.CR, GCB.LF):
+            # CR × LF
+            return BreakPossibility.NO_BREAK
         case (GCB.CONTROL | GCB.CR | GCB.LF, GCB.CONTROL | GCB.CR | GCB.LF):
             # (Control | CR | LF) ÷
             #  ÷ (Control | CR | LF)
-            if a is GCB.CR and b is GCB.LF:
-                # CR × LF
-                return BreakPossibility.NO_BREAK
-            else:
-                return BreakPossibility.CERTAIN
+            return BreakPossibility.CERTAIN
         case (GCB.L, GCB.L | GCB.V | GCB.LV | GCB.LVT):
             # L × (L | V | LV | LVT)
             return BreakPossibility.NO_BREAK
@@ -92,7 +91,6 @@ def get_last_certain_break_index(string: str, index: int) -> int:
 
 class UState(Enum):
     DEFAULT = 0  # No special case
-    GB9c_Consonant = 10
     GB9c_Linker = 11
     GB11_Picto = 20
     GB12_First = 30
@@ -118,8 +116,8 @@ class GraphemeIterator:
                 self.state = UState.GB12_First
             else:
                 lastincb = get_group_incb(self.buffer)
-                if lastincb is InCBGroup.CONSONANT:
-                    self.state = UState.GB9c_Consonant
+                if lastincb is InCBGroup.LINKER:
+                    self.state = UState.GB9c_Linker
 
     def __iter__(self) -> Iterator[str]:
         return self
@@ -134,7 +132,7 @@ class GraphemeIterator:
             self.lastg = nextg
             if do_break is True:
                 return self._break(codepoint)
-            self.buffer += codepoint  # type: ignore
+            self.buffer += codepoint
 
         if self.buffer:
             # GB2  Any ÷ eot
@@ -143,7 +141,11 @@ class GraphemeIterator:
         raise StopIteration()
 
     @staticmethod
-    def fsm(state, lastg, nextg, next_inbc) -> tuple[bool, UState]:
+    def fsm(
+        state: "UState", lastg: "GCB | None", nextg: "GCB", next_inbc: "InCBGroup"
+    ) -> tuple[bool, UState]:
+        # Breaking is the default (GB999 Any ÷ Any); cases below only need to
+        # override `do_break` when a rule says the two clusters must join.
         do_break = True
         match (state, lastg, nextg, next_inbc):
             # First the most common
@@ -156,12 +158,10 @@ class GraphemeIterator:
                 do_break = False
                 state = UState.DEFAULT
             case (_, GCB.CR | GCB.LF | GCB.CONTROL, _, InCBGroup.CONSONANT):
-                # Special case mix GB3 + GB9c Consonant
-                do_break = True
-                state = UState.GB9c_Consonant
+                # Special case mix GB3 + GB9c Consonant (break, but keep state)
+                pass
             case (_, GCB.CR | GCB.LF | GCB.CONTROL, _, _):
                 # GB4       (Control | CR | LF)	÷	 Any
-                do_break = True
                 state = UState.DEFAULT
             case (_, _, GCB.CR | GCB.LF | GCB.CONTROL, _):
                 # GB5       Any	÷	(Control | CR | LF)
@@ -186,20 +186,24 @@ class GraphemeIterator:
                 # GB9b      Prepend	×	Any
                 do_break = False
                 state = UState.DEFAULT
-            # GB9c	        Consonant [ Extend Linker ]* Linker [ Extend Linker ]* × Consonant
+            # GB9c	        Linker Extend* × Consonant
             case (UState.GB9c_Linker, _, _, InCBGroup.CONSONANT):
-                state = UState.GB9c_Consonant
+                state = UState.DEFAULT
                 do_break = False
-            case (UState.GB9c_Consonant | UState.GB9c_Linker, _, _, InCBGroup.EXTEND):
+            case (UState.GB9c_Linker, _, _, InCBGroup.EXTEND):
                 # unchanged state
                 do_break = False
-            case (UState.GB9c_Consonant | UState.GB9c_Linker, _, _, InCBGroup.LINKER):
-                state = UState.GB9c_Linker
+            case (_, _, GCB.EXTEND, InCBGroup.LINKER):
+                # GB9       Any	×	(Extend | ZWJ)
                 do_break = False
-            case (_, _, _, InCBGroup.CONSONANT):  # generic state last
-                # Consonant
-                state = UState.GB9c_Consonant
+                state = UState.GB9c_Linker
+            case (_, _, _, InCBGroup.LINKER):
+                state = UState.GB9c_Linker
                 # do not change do_break
+            case (UState.GB9c_Linker, _, GCB.EXTEND | GCB.ZWJ, _):
+                # GB9       Any	×	(Extend | ZWJ)
+                do_break = False
+                state = UState.DEFAULT
             # GB11:         \p{Extended_Pictographic} Extend* ZWJ × \p{Extended_Pictographic}
             case (UState.GB11_Picto, _, GCB.EXTEND | GCB.ZWJ, _):
                 # Extend + ( Extend* + ) ZWJ
@@ -219,10 +223,9 @@ class GraphemeIterator:
                 do_break = False
                 state = UState.GB12_Second
             case (UState.GB12_Second, GCB.REGIONAL_INDICATOR, GCB.REGIONAL_INDICATOR, _):
-                do_break = True
+                # second RI of a pair completes it -> break before the next
                 state = UState.GB12_First
             case (_, _, GCB.REGIONAL_INDICATOR, _):  # generic state always last
-                do_break = True
                 state = UState.GB12_First
             case (_, _, GCB.EXTEND | GCB.ZWJ, _):  # generic state always last
                 # GB9       Any	×	(Extend | ZWJ)
@@ -231,7 +234,6 @@ class GraphemeIterator:
                 # state = UState.DEFAULT
             case _:
                 # GB999	    Any	÷	Any
-                do_break = True
                 state = UState.DEFAULT
         return do_break, state
 

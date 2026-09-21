@@ -18,14 +18,14 @@ RANGE_TREE: tuple[list[int], list[tuple[int, int, InCBPropertyGroup]]] = ([], []
 SINGLE_CHAR_MAPPINGS = dict[int, InCBPropertyGroup]()
 
 
-def get_group(char):
+def get_group(char) -> InCBPropertyGroup:
     if char in COMMON_OTHER_GROUP_CHARS:
         return InCBPropertyGroup.OTHER
     return get_group_ord(ord(char))
 
 
 @lru_cache(128)
-def get_group_ord(char):
+def get_group_ord(char) -> InCBPropertyGroup:
     group = SINGLE_CHAR_MAPPINGS.get(char, None)
     if group:
         return group

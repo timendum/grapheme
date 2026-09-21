@@ -1,10 +1,44 @@
+import sys
+
 from grapheme.finder import GraphemeIterator
 from grapheme.grapheme_property_group import get_group
 from grapheme.incb_property_group import get_group as get_group_incb
 
 
+def trace_fsm(state, lastg, nextg, next_inbc):
+    """Call GraphemeIterator.fsm while tracing which `case` line matched."""
+    fsm_code = GraphemeIterator.fsm.__code__
+    matched_lines = []
+
+    def tracer(frame, event, arg):
+        if frame.f_code is not fsm_code:
+            return tracer
+        if event == "line":
+            matched_lines.append(frame.f_lineno)
+        return tracer
+
+    old = sys.gettrace()
+    sys.settrace(tracer)
+    try:
+        result = GraphemeIterator.fsm(state, lastg, nextg, next_inbc)
+    finally:
+        sys.settrace(old)
+
+    # Read the source lines that executed so we can show the matched case.
+    import inspect
+
+    src_lines, start = inspect.getsourcelines(GraphemeIterator.fsm)
+    # Find the nearest `case` line at or above each executed line.
+    case_desc = None
+    for lineno in matched_lines:
+        idx = lineno - start
+        if 0 <= idx < len(src_lines) and src_lines[idx].strip().startswith("case "):
+            case_desc = (lineno, src_lines[idx].strip())
+    return result, case_desc
+
+
 def main():
-    s = "\u2701\u200d\u2701\u200d\u231a"
+    s = "\u1cf5\u200c\u0995"
     print(list(s))
     it = GraphemeIterator(s)
     nextg = get_group(s[0])
@@ -14,9 +48,13 @@ def main():
         nextg = get_group(codepoint)
         next_inbc = get_group_incb(codepoint)
         last_state = it.state
-        do_break, it.state = it.fsm(it.state, it.lastg, nextg, next_inbc)
+        (do_break, it.state), matched_case = trace_fsm(it.state, it.lastg, nextg, next_inbc)
         it.lastg = nextg
         print(repr(s[i]) + repr(codepoint), do_break, last_state, it.lastg, nextg, next_inbc)
+        if matched_case:
+            print(f"    matched case @ line {matched_case[0]}: {matched_case[1]}")
+        else:
+            print("    matched case: <none captured>")
 
 
 if __name__ == "__main__":

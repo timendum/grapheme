@@ -144,6 +144,7 @@ def index(string: str, substring: str) -> int:
             str_sub_part.append(next(str_iter))
             # substring is in string (first check), so `str_iter` never stops before
 
+        idx = -1
         for idx, g in enumerate(str_iter):
             if str_sub_part == substr_graphemes:
                 return idx
