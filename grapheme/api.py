@@ -2,7 +2,7 @@ from collections.abc import Iterator
 
 from grapheme.finder import GraphemeIterator, get_last_certain_break_index
 
-UNICODE_VERSION = "17.0.0"
+UNICODE_VERSION = "18.0.0"
 
 
 def graphemes(string: str) -> Iterator[str]:
