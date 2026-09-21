@@ -6,7 +6,10 @@ readme = "README.rst"
 requires-python = ">=3.10"
 authors = [{ name = "Alvin Lindstam", email = "alvin.lindstam@gmail.com" }]
 maintainers = [{ name = "Timendum" }]
-license = { text = "MIT" }
+license =  "MIT"
+license-files = [
+    "LICENSE",
+]
 keywords = ["unicode", "grapheme"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -20,7 +23,7 @@ Homepage = "https://github.com/timendum/grapheme"
 Documentation = "https://graphemeu.readthedocs.io/"
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov"]
+dev = ["pytest", "pytest-cov", "ruff"]
 docs = ["sphinx", "sphinx-autobuild"]
 
 [build-system]
@@ -44,7 +47,7 @@ lint.select = [
     "G",
     "PIE",
     "PYI",
-    "TCH",
+    "TC",
     "PLE",
     "PLW",
 ]
