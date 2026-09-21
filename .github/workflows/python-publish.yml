@@ -6,13 +6,15 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+
 jobs:
   release-build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
     - name: Set up Python
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v10
     - name: Install dependencies
       run: uv sync --all-extras --dev
     - name: Lint with ruff
@@ -22,7 +24,7 @@ jobs:
     - name: Build
       run: uv build
     - name: Upload distributions
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: release-dists
         path: dist/
